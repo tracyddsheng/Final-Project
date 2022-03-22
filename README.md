@@ -10,7 +10,7 @@ desc of project
 ## Class Diagram
 
 
-# Programming Project Proposal 3
+# Programming Project Proposal 2
 desc of project
 
 ## GUI Mockup #1 (Start Screen)
