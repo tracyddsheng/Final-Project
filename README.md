@@ -2,7 +2,7 @@
 classic puzzle game - clear the board without setting off any mines
 
 ## GUI Mockup #1 (Start Screen)
-![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/minesweeperStart.drawio)
+![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/minesweeperStart.png)
 
 ## GUI Mockup #2 (Gameplay)
 
