@@ -21,6 +21,7 @@ two player strategy guessing game - sink all the enemy's ships before they sink 
 ## GUI Mockup #1 (Start Screen)
 
 ## GUI Mockup #2 (Gameplay)
+![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/battleshipGameplay.png)
 
 ## GUI Mockup #3 (End Screen)
 
