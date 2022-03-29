@@ -10,7 +10,8 @@ classic puzzle game - clear the board without setting off any mines
 ![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/Untitled%20Diagram.drawio.png)
 
 ## GUI Mockup #3 (End Screen)
-![] (https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/Untitled%20Diagram.jpg)
+![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/Untitled%20Diagram.jpg)
+
 ## Class Diagram
 
 
