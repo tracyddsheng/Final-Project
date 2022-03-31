@@ -14,7 +14,7 @@ classic puzzle game - clear the board without setting off any mines
 
 ## Class Diagram
 
-
+![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/MS%20class%20diagram.drawio.png?raw=tru![])
 # Programming Project Proposal 2 - Battleship
 two player strategy guessing game - sink all the enemy's ships before they sink yours
 
