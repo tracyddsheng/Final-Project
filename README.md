@@ -19,6 +19,7 @@ classic puzzle game - clear the board without setting off any mines
 two player strategy guessing game - sink all the enemy's ships before they sink yours
 
 ## GUI Mockup #1 (Start Screen)
+![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/battleshipStart.drawio.png)
 
 ## GUI Mockup #2 (Gameplay)
 ![](https://github.com/tracyddsheng/ProgrammingProject/blob/main/images/battleshipGameplay.png)
