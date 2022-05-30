@@ -2,12 +2,11 @@
 #include <tgmath.h>
 #include <ctime>
 using namespace std;
-int height = 9, width = 9, minecount, minecountperm = 10, choicex, choicey, mines = 0, tiempo, difficulty;
-bool win = true, gamecontinue = false, zero =false;
+int height = 9, width = 9, minecount = 10, x, y, mines = 0, tiempo, difficulty = 0, flaggy, middle;
+bool win = true, gamecontinue = false, zero =false, flags = false;
 string output = "", loss = "";
 char replay;
 char letters[] = {'Q','W','E','R','T','Y','U','I','O'};
-
 
 int main() {
 
@@ -15,88 +14,83 @@ int main() {
   cout << "  __  __ _             ____\n |  \\/  (_)_ __   ___ / ___| _     "
           "_\n | |\\/| | | '_ \\ / _ \\ |   _| |_ _| |_\n | |  | | | | | |  "
           "__/ |__|_   _|_   _|\n |_|  |_|_|_| |_|\\___|\\____||_|   |_|\n";
-  cout << "By Eden Harvey, Thushar Reppale, and Tracy Sheng\n";
+  cout << "By Eden Harvey, Thushar Reppale, and Tracy Sheng\nsingle digits showed for ease of entry\n";
   cout << "Enter column number first, then enter row number"
           "\n";
   //comes back to the start so they can replay and choose a different difficulty if desired;
   REPLAY:
   cout << "ENTER NUMBER FOR DIFFICULTY\n1 for beginner\n2 for intermediate\n3 for expert\n4 for custom\n";
   cin >> difficulty;
+  //switch to set size and number of mines based off difficulty
+  switch(difficulty) {
+    case 1:
+      height=9;
+      width=9;
+      minecount=10;
+      break;
+    case 2:
+      height=16;
+      width=16;
+      minecount=40;
+      break;
+    case 3:
+      height=16;
+      width=30;
+      minecount=99;
+      break;
+    case 4:
+      cout << "enter board height:\n";
+      cin >> height;
+      cout << "enter board width:\n";
+      cin >> width;
+      cout << "enter number of mines:\n";
+      cin >> minecount;
+  }
+  cout << "do you want flags enabled? 0 for no 1 for yes\n";
+  cin >> difficulty;
+  if(difficulty == 0){flags=false;}
   if(difficulty == 1){
-    height=9;
-    width=9;
-    minecount=10;
-  }
-  if(difficulty == 2){
-    height=16;
-    width=16;
-    minecount=40;
-  }
-  if(difficulty == 3){
-    height=16;
-    width=30;
-    minecount=99;
-  }
-  if(difficulty == 4){
-    cout << "enter board height:\n";
-    cin >> height;
-    cout << "enter board width:\n";
-    cin >> width;
-    cout << "enter number of mines:\n";
-    cin >> minecount;
+    flags = true;
+    cout << "before entering numbers enter 1 if you wnat to clear the square and 0 if you want to flag it\n";
   }
   
   // creates the griddy first
   // randomization for mine placement
   // divides mines left to place by squares left to check to rng
   srand(time(NULL));
-  minecount = minecount;
   char griddy[height][width];
+  bool friddy[height][width];
   for (int i = 0; i < width * height; i++) {
     if (rand() % 10000 < (10000 * minecount / (width * height - i))) {
-      griddy[int(floor((i) / width))][int((i)-width * (floor((i) / width)))] =
-          'X';
+      griddy[int(floor(i/width))][int(i-width*(floor(i/width)))] = 'X';
       minecount--;
     } else {
-      griddy[int(floor((i) / width))][int((i)-width * (floor((i) / width)))] =
-          'O';
+      griddy[int(floor(i/width))][int(i-width*(floor(i/width)))] = 'O';
     }
+    friddy[int(floor(i/width))][int((i)-width*(floor(i/width)))] = false;
   }
 
   //deterines the number of mines surrunding a square
+  // and puts it into the griddy
   for (int h = 0; h < height; h++) {
     for (int w = 0; w < width; w++) {
       if (griddy[h][w] != 'X') {
         mines = 0;
-        if (griddy[h - 1][w - 1] == 'X' && h != 0 && w != 0) {
-          mines++;
-        }
-        if (griddy[h - 1][w] == 'X' && h != 0) {
-          mines++;
-        }
-        if (griddy[h - 1][w + 1] == 'X' && h != 0 && w != width - 1) {
-          mines++;
-        }
-        if (griddy[h][w - 1] == 'X' && w != 0) {
-          mines++;
-        }
-        if (griddy[h][w + 1] == 'X' && w != width - 1) {
-          mines++;
-        }
-        if (griddy[h + 1][w - 1] == 'X' && h != height - 1 && w != 0) {
-          mines++;
-        }
-        if (griddy[h + 1][w] == 'X' && h != height - 1) {
-          mines++;
-        }
-        if (griddy[h + 1][w + 1] == 'X' && h != height - 1 && w != width - 1) {
-          mines++;
+        for(int r= -1;r<=1;r++) {
+          for(int c= -1;c<=1;c++) {
+            if(h+r!=-1 && w+c!=-1 && h+r!=height && w+c!=width){
+              if(griddy[h+r][w+c] == 'X'){
+                mines++;
+              }
+            }
+          }  
         }
         griddy[h][w] = '0' + mines;
       }
     }
   }
 
+  //creates the loss output that displays when they lose the game
   loss = "";
   for (int h = 0; h < height; h++) {
     for (int w = 0; w < width; w++) {
@@ -104,219 +98,152 @@ int main() {
     }
     loss+= "\n";
   }
-  tiempo = time(NULL);
 
   
+  tiempo = time(NULL);
   while(win){
 
-    //dont worry about this while loop
-    //its not ver good
-    while(zero){
-      CERO:
-      zero = false;
-      if (griddy[choicey - 1][choicex - 1] == '0' && choicey != 0 && choicex != 0) {
-        zero = true;
-        choicey--;
-        choicex--;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
+    //wehn theres a zero this clears all the surrounding squares
+    //that are also zeroes or next to zeroes
+    for (int t = 0; t < max(width,height); t++) {
+      for (int h = 0; h < height; h++) {
+        for (int w = 0; w < width; w++) {
+          if(griddy[h][w] == 'Q') {
+            for(int r= -1;r<=1;r++) {
+              for(int c= -1;c<=1;c++) {
+                if(h+r!=-1 && w+c!=-1 && h+r!=height && w+c!=width){
+                  for(int k = 0; k < 9; k++){
+                    if(griddy[h+r][w+c] == '0'+k){
+                      griddy[h+r][w+c] = letters[k];
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-        goto CERO;
-      }
-      if (griddy[choicey - 1][choicex] == '0' && choicey != 0) {
-        zero = true;
-        choicey--;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey - 1][choicex + 1] == '0' && choicey != 0 && choicex != width - 1) {
-        zero = true;
-        choicey--;
-        choicex++;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey][choicex - 1] == '0' && choicex != 0) {
-        zero = true;
-        choicex--;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey][choicex + 1] == '0' && choicex != width - 1) {
-        zero = true;
-        choicex++;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey + 1][choicex - 1] == '0' && choicey != height - 1 && choicex != 0) {
-        zero = true;
-        choicey++;
-        choicex--;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey + 1][choicex] == '0' && choicey != height - 1) {
-        zero = true;
-        choicey++;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
-      }
-      if (griddy[choicey + 1][choicex + 1] == '0' && choicey != height - 1 && choicex != width - 1) {
-        zero = true;
-        choicey++;
-        choicex++;
-        if(true){
-          if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';}
-          if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-          if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-          if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-          if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-          if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-          if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-          if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-          if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
-        }
-        goto CERO;
       }
     }
-    
-    //does the outputthingie yknow
+      
     output = "  ";
     gamecontinue = false;
-    for (int w = 0; w < width; w++) {
-      if (w >= 0 && w <= 8) {
-        output += to_string(w+1) + " ";
-      } else if (w >= 9 && w <= 18) {
-        output += to_string(w-9) + " ";
-      } else if (w >= 19 && w <= 28) {
-        output += to_string(w-19) + " ";
-      } else if (w >= 29) {
-        output += to_string(w-29) + " ";
-      }
+
+    //first adds the numbers up top
+    for (int w = 1; w <= width; w++) {
+      output+= to_string(int((w) - 10*(floor(w/10))))+" ";
     }
     output += "\n";
+    
     for (int h = 0; h < height; h++) {
-      if (h >= 0 && h <= 8) {
-        output += to_string(h+1) + " ";
-      } else if (h >= 9 && h <= 18) {
-        output += to_string(h-9) + " ";
-      } else if (h >= 19 && h <= 28) {
-        output += to_string(h-19) + " ";
-      } else if (h >= 29) {
-        output += to_string(h-29) + " ";
-      }
+      //adds numbers to the left side as well 
+      output+= to_string(int((h+1) - 10*(floor((h+1)/10)))) + " ";
       for (int w = 0; w < width; w++) {
-        if(griddy[h][w] == 'X'){
-          output+=". ";
+        //puts out flag if its flagged
+        if(friddy[h][w]){
+          output+="⚐ ";
+        }else{
+          //adds the uncleared square if its a mine
+          if(griddy[h][w] == 'X'){
+            output+="◼ ";
+          }
+          //adds the uncleared square if its an uncleared nonmine
+          for(int k = 0; k < 9; k++){
+            if(griddy[h][w] == '0'+k){
+              output+="◼ ";
+              gamecontinue=true;
+            }
+          }
+
+          //adds the number of dot if its a cleared nonmine
+          if(griddy[h][w] == 'Q'){output+=". ";}
+          for(int k = 1; k < 9; k++){
+            if(griddy[h][w] == letters[k]) {
+              output+=to_string(k)+" ";
+            }
+          }
         }
-        if(griddy[h][w] == '0' || griddy[h][w] == '1' || griddy[h][w] == '2' || griddy[h][w] == '3' || griddy[h][w] == '4' || griddy[h][w] == '5' || griddy[h][w] == '6' || griddy[h][w] == '7' || griddy[h][w] == '8'){
-          output+=". ";
-          gamecontinue=true;
-        }
-        if(griddy[h][w] == 'Q'){output+="* ";}
-        if(griddy[h][w] == 'W'){output+="1 ";}
-        if(griddy[h][w] == 'E'){output+="2 ";}
-        if(griddy[h][w] == 'R'){output+="3 ";}
-        if(griddy[h][w] == 'T'){output+="4 ";}
-        if(griddy[h][w] == 'Y'){output+="5 ";}
-        if(griddy[h][w] == 'U'){output+="6 ";}
-        if(griddy[h][w] == 'I'){output+="7 ";}
-        if(griddy[h][w] == 'O'){output+="8 ";}
       }
       output += "\n";
     }
+
+    //displays the actual output
     cout << "\n"<<output<<"\n";
-    if(!gamecontinue){
-      break;
-    }
-    
-    cin >> choicex;
-    cin >> choicey;
-    choicex-=1;
-    choicey-=1;
-    if(true){
-      if(griddy[choicey][choicex]=='X'){win=false;}
-      if(griddy[choicey][choicex]=='0'){griddy[choicey][choicex]='Q';zero = true;}
-      if(griddy[choicey][choicex]=='1'){griddy[choicey][choicex]='W';}
-      if(griddy[choicey][choicex]=='2'){griddy[choicey][choicex]='E';}
-      if(griddy[choicey][choicex]=='3'){griddy[choicey][choicex]='R';}
-      if(griddy[choicey][choicex]=='4'){griddy[choicey][choicex]='T';}
-      if(griddy[choicey][choicex]=='5'){griddy[choicey][choicex]='Y';}
-      if(griddy[choicey][choicex]=='6'){griddy[choicey][choicex]='U';}
-      if(griddy[choicey][choicex]=='7'){griddy[choicey][choicex]='I';}
-      if(griddy[choicey][choicex]=='8'){griddy[choicey][choicex]='O';}
+    //exits the loop if all the nonmine squares are cleared
+    if(!gamecontinue) break;
+
+    //asks for flag input if they agree to turnon flags
+    if(flags) {
+      cin >> flaggy;
     }
 
+    //askes them for their choices and subtracts one immediately
+    cin >> x;
+    cin >> y;
+    x--;
+    y--;
+	
+    //alters friddy if flags are enabled
+    if(flaggy == 0){
+			for(int k = 0; k < 9; k++){
+        if(griddy[y][x] == '0'+k || griddy[y][x] == 'X'){
+          friddy[y][x]=!friddy[y][x];
+					break;
+        }
+      }
+    }else{
+			if(!friddy[y][x]){
+				
+	      //if they picked a mine they take an L and lose 
+	      if(griddy[y][x]=='X'){win=false;}
+	
+	      //if they didnt pick a mine then it clears it
+	      for(int k = 0; k < 9; k++){
+	        if(griddy[y][x] == '0'+k){
+	          griddy[y][x] = letters[k];
+	        }
+	      }
+
+				//if they pick a cleared mine it checks the flags around it
+				// and does the middle click thing
+				if(flags){
+					middle = 0;
+					for(int k = 1; k < 9; k++){
+		        if(griddy[y][x] == letters[k]) {
+		          for(int r= -1;r<=1;r++) {
+			          for(int c= -1;c<=1;c++) {
+			            if(y+r!=-1 && x+c!=-1 && y+r!=height && x+c!=width){
+			              if(friddy[y+r][x+c]){
+			                middle++;
+			              }
+			            }
+			          }  
+			        }
+							if(k==middle){
+								for(int r= -1;r<=1;r++) {
+			          	for(int c= -1;c<=1;c++) {
+										if(y+r!=-1 && x+c!=-1 && y+r!=height && x+c!=width){
+											if(!friddy[y+r][x+c]){
+												//if they picked a mine they take an L and lose 
+									      if(griddy[y][x]=='X'){win=false;}
+									      //if they didnt pick a mine then it clears it
+									      for(int k = 0; k < 9; k++){
+									        if(griddy[y+r][x+c] == '0'+k){
+									          griddy[y+r][x+c] = letters[k];
+									        }
+									      }
+				              }
+										}
+									}
+								}
+							}
+		        }
+		      }
+				}
+			}
+    }
   }
 
+  //win and lose conditions, and asks if they want to replay
   if (win) {
     cout << "You win! Time: "<<	time(NULL)-tiempo <<"\n";
   } else {
